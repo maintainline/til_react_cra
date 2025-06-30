@@ -212,6 +212,10 @@ npm install eslint@7 -D
 ```bash
 npx eslint --init
 ```
+- 아래 항목 순서대로 설치하기
+![Image](https://github.com/user-attachments/assets/c0b27a73-3300-41fd-a3c5-a53de5cb6661)
+
+
 
 ### 5.2. prettier 설정
 
@@ -246,6 +250,7 @@ npm i prettier -D
 
 ```bash
 npm i  eslint-config-prettier -D
+# 위에 오류시에 밑에 코드
 npm i  eslint-plugin-prettier -D --force
 ```
 
@@ -260,7 +265,7 @@ npm i  eslint-plugin-prettier -D --force
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended" // 이줄만 추가
   ],
   "parserOptions": {
     "ecmaFeatures": {
@@ -304,3 +309,6 @@ export default App;
 
 - `.vscode` 폴더 만들기
 - `.vscode/settings.json` 파일 만들기
+
+
+
