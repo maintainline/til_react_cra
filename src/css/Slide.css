@@ -1,0 +1,25 @@
+.title {
+  color: blueviolet;
+  font-size: 40px;
+  text-align: center;
+}
+.content {
+  position: relative;
+  font-size: 20px;
+  text-align: center;
+  font-weight: 500;
+color: salmon;
+}
+.slide{
+    background-color: palevioletred;
+color: azure;
+font-weight: 900;
+margin: 20px 0;
+
+}
+.notice{
+    background-color: royalblue;
+    color: #fff;
+    padding: 10px 0;
+    
+}

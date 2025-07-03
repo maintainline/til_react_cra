@@ -576,3 +576,21 @@ export default Header;
 ```jsx
 import BgObjRed, { BgObj } from "./bg";
 ```
+
+# CSS-in-JS
+
+- Styled Component
+- Emotion
+
+## 1. 환경설정
+
+```bash
+npm i @emotion/react @emotion/styled
+
+# 따로 적어도 됨 (위랑 같은 내용)
+npm i @emotion/react 
+npm i @emotion/styled
+```
+## 2. 왜 필요한가.?
+- 태그처럼 생겼다. (내가만든 태그)
+- 태그가 내용을 설명하도록 구성한다.
