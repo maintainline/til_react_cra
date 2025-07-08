@@ -1,71 +1,58 @@
-# 리액트 Event
+# useState
 
-- 사용자의 인터렉션 (마우스 관련,내용 입력 등등)
-- `카멜케이스` 임을 기억하자.
+- 리액트에서 변수를 만드는 법
+- `변수의 값이 변하면 웹브라우저의 화면도 변한다.`
 
-## 1. 이벤트 종류
+```jsx
+const [변수명, set변수명] = useState(초기값);
+```
 
-- onClick : 마우스 클릭
-- onChange : form 태그의 내용이 바뀔때
-- onSubmit : form 을 확인해서 전송할때
-- onKeyDown : keyboard 누를때 (거의 안씀.)
-- onKeyUp : keyboard 뗄때
-- onMouseEnter : 마우스 커서가 영역에서 걸쳐질때
-- onMouseLeave : 마우스 커서가 영역에서 벗어날때
-- onFocus : form 요소에 포커스가 될때
-- onBlur : form 요소에 포커스가 해제될때
-- onInput : form 요소에 입력할때 마다
-- onDoubleClick : 더블클릭할 때
-- `<태그 onClick = {(e)=>함수명(e)}>`전부 이런식으로 생김
+## 1. 일반 js 라면
 
-## 2. 예제
-
-- `매개 변수 없는 경우`와 `존재하는 경우 구분`하기
-
-### 2.1. onClick 이벤트
+- 화면에 초기 값만 보이고 변화가 없다.
+  https://github.com/maintainline/til_react_cra/issues/10#issue-3211487851
 
 ```jsx
 import React from "react";
 
 function Test() {
   //js
-  const handleClick = () => {
-    alert("클릭");
-  };
-
-  const handleClickParam = a => {
-    alert(a);
+  let count = 0; //js 변수
+  const add = () => {
+    count = count + 1;
+    console.log(count);
   };
   //jsx
   return (
     <div>
-      <button onClick={handleClick}>매개 변수 없는 클릭이벤트</button>
-      <button onClick={() => handleClickParam("안녕")}>
-        매개 변수 있는 클릭이벤트
-      </button>
+      <button onClick={add}>함수실행</button>
+      <p>count : {count}</p>
     </div>
   );
 }
-// handleClickParam()<- 함수 바로 실행 되기때문에 앞쪽에 ()=> 추가해 주어야함.
+
 export default Test;
 ```
 
-### 2.2. onChange 이벤트
+## 2. 리액트 변수라면
 
-- event.taget : 현재는 input 태그를 가르킴
-- event.taget.value : 현재 input 태그의 값(내용을 말함)을 가르킴
+- 값이 set 으로 변하며 화면도 새로 그린다.
 
 ```jsx
 import React, { useState } from "react";
 
 function Test() {
   //js
-  const [txt, setTxt] = useState("");
+  const [count, setCount] = useState(0); //리액트 변수
+  const add = () => {
+    setCount(count + 1);
+    console.log(count);
+  };
   //jsx
   return (
     <div>
-      <input type="text" onChange={event => setTxt(event.target.value)} />
-      <p>입력된 값 :{txt}</p>
+      <button onClick={add}>함수실행</button>
+      <p>count : {count}</p>
     </div>
   );
 }
@@ -73,68 +60,40 @@ function Test() {
 export default Test;
 ```
 
-### 2.3. onSubmit 이벤트
-
-- `아주중요!`
+### 3. 다양한 예제
 
 ```jsx
-import React from "react";
+// 이름출력하기
+import React, { useState } from "react";
 
 function Test() {
-  // js 자리
-  const handleSubmit = event => {
-    // 반드시 체크하자.
-    event.preventDefault(); // 새로고침하지마라.
-    // 새로고침하면 안되니 꼭 적어줄것  event.preventDefault();
-    console.log(event.target);
-    console.log(event.target.id);
-    console.log(event.target.id.value);
-    console.log(event.target.pw);
-    console.log(event.target.pw.value);
-    if (!event.target.id.value) {
-      alert("아이디를 입력하세요");
-    }
-    if (!event.target.pw.value) {
-      alert("비밀번호를 입력하세요");
-    }
-    alert("로그인 시도중...");
+  //js
+  const [userName, setUserName] = useState(""); // 리엑트 변수
+  const handleChange = e => {
+    // setUserName(e.target.value);
   };
-  // jsx 자리
-  return (
-    <div>
-      <form onSubmit={e => handleSubmit(e)}>
-        <input type="text" name="id" />
-        <input type="password" name="pw" />
-        <input type="submit" />
-      </form>
-    </div>
-  );
-}
-
-export default Test;
-```
-
-### 2.4. Keyborad 이벤트
-
-- onKeyDown 은 키보드 누르고 있으면 무한하게 발생한다.(조심해서 사용)
-- onKeyUp 은 키보드에서 뗏을때. (주로 `Enter키 눌렀다가 떼었을때.`)
-
-```jsx
-import React from "react";
-
-function Test() {
-  // js 자리
-  const handleSearch = e => {
-    console.log(e.target);
-    const txt = e.target.value;
+  const handleKeyUp = e => {
     if (e.key === "Enter") {
-      alert(`${txt}검색합니다.`);
+      const txt = e.target.value;
+      // 추후 yup 라이브러이 사용해보자..
+      if (!txt) {
+        alert("이름을 입력하세요!");
+        return;
+      }
+      setUserName(txt);
     }
   };
-  // jsx 자리
+  //jsx
   return (
     <div>
-      <input type="text" name="id" onKeyUp={e => handleSearch(e)} />
+      <h1>사용자 이름을 입력하면 이름 출력하기</h1>
+      <input
+        type="text"
+        onChange={e => handleChange(e)}
+        onKeyUp={e => handleKeyUp(e)}
+        placeholder="이름을 입력하세요."
+      />
+      <h2>안녕하세요 {userName}님 반가워요^ㅡ^</h2>
     </div>
   );
 }
@@ -142,31 +101,26 @@ function Test() {
 export default Test;
 ```
 
-### 2.5. Mouse 이벤트
-
-- onMouseOver, onMouseOut : 이것은 사용하시면 안됩니다..
-- `onMouseEnter, onMouseLeave :  이것을 사용하셔야 합니다..`
-
 ```jsx
-import React from "react";
+// 체크박스 만들기
+import React, { useState } from "react";
 
 function Test() {
   //js
-  const handleOver = () => {
-    console.log("마우스 오버");
-  };
-  const handleOut = () => {
-    console.log("마우스 아웃");
+  const [agree, setAgree] = useState(false);
+  const handleChange = e => {
+    console.log(e.target);
+    console.log(e.target.value);
+    setAgree(e.target.checked);
   };
   //jsx
   return (
-    <div
-      onMouseEnter={handleOver}
-      onMouseLeave={handleOut}
-      style={{ backgroundColor: "yellow" }}
-    >
-      <div style={{ border: "5px solid red", margin: "20px" }}>박스</div>
-      <div style={{ border: "5px solid blue", margin: "20px" }}>박스 2</div>
+    <div>
+      <label>
+        <input type="checkbox" onChange={e => handleChange(e)} /> 약관에
+        동의합니다.
+      </label>
+      <p>{agree ? "동의합니다." : "동의가 필요합니다."}</p>
     </div>
   );
 }
@@ -174,29 +128,31 @@ function Test() {
 export default Test;
 ```
 
-### 2.6. Focus 이벤트
-
-- onFocus, onBlur : 포커스 된 경우와 , 해제된 경우(input 태그)
-
 ```jsx
-import React from "react";
+import React, { useState } from "react";
 
 function Test() {
   //js
-  const handleFocus = () => {
-    console.log("포커스 되었네요.");
-  };
-  const handleBlur = () => {
-    console.log("포커스 해제 되었네요.");
+  const [todoList, setTodoList] = useState([]);
+  const handleClick = () => {
+    const temp = "할일이지요.";
+    setTodoList([...todoList, temp]);
   };
 
   //jsx
   return (
     <div>
-      <input type="text" onFocus={handleFocus} onBlur={handleBlur} />
+      <input type="text" />
+      <button onClick={handleClick}>목록추가</button>
+      <ul>
+        {todoList.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
     </div>
   );
 }
 
 export default Test;
 ```
+08
