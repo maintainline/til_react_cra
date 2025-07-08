@@ -21,3 +21,17 @@
 npx create-react-app@latest 프로젝트명
 npx create-react-app@latest .
 ```
+
+
+
+
+
+
+# useState
+
+- 리액트에서 변수를 만드는 법
+- `변수의 값이 변하면 웹브라우저의 화면도 변한다.`
+
+```jsx
+const [변수명, set변수명] = useState(초기값);
+```
