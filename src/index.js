@@ -11,12 +11,9 @@ import Todos from "./pages/Todos";
 import Users from "./pages/Users";
 import Test from "./pages/Test";
 import RegisterPage from "./pages/RegisterPage";
+import Todo from "./pages/Todo";
 
 // 컴포넌트
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-root.render(
-  <div className="wrap">
-    <Test />
-  </div>,
-);
+root.render(<Todo className="wrap">Todo</Todo>);
