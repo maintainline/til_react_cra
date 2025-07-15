@@ -1,1990 +1,581 @@
-# useEffect
+# react -router-dom
 
-## 1. 특징
+- 리액트에는 http 경로로 페이지 이동을 못합니다. 즉 `화면이동을 못합니다.`
+- http 경로를 흔히 `라우터`라고 칭합니다.
+- 라우터 즉, 경로를 이동하려면 `react router dom` 을 사용해야함.
 
-- 리랜더링에서 제외되는 Hook
-- Hook 은 우선 `컴포넌트에서 자동 실행`되는 함수
-- useState 에서 만든 리액트 변수 출력하기 / 리액트 변수 확인하기
-- 백엔드 비동기 통신 / fetch 함수를 호출하기
+## 1. 참고사항
 
-## 2. 작동/실행이 되는 3가지 경우
+- a 태그
 
-### 2.1. 컴포넌트가 화면에 보여질 때(랜더링)
-
-- 딱 한번만 실행됩니다.
-
-```js
-useEffect(() => {
-  //딱 한번반 실행되면 좋겠다.
-}, []);
+```html
+<a href="라우터">이동</a>
 ```
 
-### 2.2. 계속 실행되는 경우 (리랜더링시)
+- form 태그
 
-```js
-useEffect(() => {
-  //계속 하고싶은 일
-}, [리액트변수]);
+```html
+<form action="라우터">~</form>
 ```
 
-### 2.3. 컴포넌트가 사라질때 (화면에서 제거될때)
+## 2. URI의 구성
 
-- 클린업 함수
-
-```js
-useEffect(() => {
-  //딱 한번만 실행하기
-  //딱 한번만 실행하기
-  //딱 한번만 실행하기
-  return () => {
-    // 사라질때 하고싶은말
-  };
-}, []);
+```txt
+http://localhost:3000/todo/login?id=hong&pass=1234
 ```
 
-```js
-useEffect(() => {
-  //계속 실행하기
-  //계속 실행하기
-  //계속 실행하기
-  return () => {
-    // 사라질때 하고싶은말
-  };
-}, [리액트변수]);
+## 2.1. Protocol (네트워크 처리를 위한 약속)
+
+```txt
+http://
 ```
 
-## 3. 이해를 해보자
+```txt
+HTTP(HyperText Transfer Protocol)
+: 웹 브라우저와 서버 컴퓨터간의 데이터 전송 규약
 
-```js
-useEffect(() => {
-  widown.addEventListenr("resize", function () {
-    // 실행할일
-  });
-  widown.addEventListenr("scroll", function () {
-    // 실행할일
-  });
+HTTPS (HTTP Secure)
+: HTTP 에 보안(SSL/TLS)을 추가한 프로토콜
 
-  // 클린업 함수
-  return () => {
-    widown.removeEventListenr("resize", function () {
-      // 실행할일
-    });
-    widown.removeEventListenr("scroll", function () {
-      // 실행할일
-    });
-  };
-}, []);
+FTP (File Transfer Protocol)
+: 파일 전송에 사용하는 프로토콜
+: 웹 호스팅(웹 퍼블리싱을 하고나면 FTP 로 서버에 파일을 업로드하여 서비스)
+: Filezilla, 알FTP
+
+SMTP (Simple Mail Transfer Protocol)
+: 이메일 전송
+
+IMAP (Ineternet Message Access Protocol)
+: 이메일 수신 (서버에서 관리)
+
+POP3(Post Office Protocol 3)
+: 이메일 수신(다운로드 후 로컬 관리)
+
+DNS (Domain Name System)
+: 도메인 이름을 IP 주소로 변환
+
+DHCP (Dynamic Host Cofiguration Protocol)
+: 동적 IP할당
+
 ```
 
-- 예제
+### 2.2. 도메인(Domain)
 
-```js
-import React, { useEffect, useState } from "react";
-//전역
-function Test() {
-  //js
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    console.log("하이염");
-    return () => {
-      console.log("빠이염");
-    };
-  }, []);
-  useEffect(() => {
-    console.log(`${count}이군요. 후후`);
-    return () => {
-      console.log("빠이빠이염");
-    };
-  }, [count]);
+```txt
+http://      `localhost`      :3000/todo/login?id=hong&pass=1234
 
-  //jsx
+```
+
+- 일반적으로 `홈페이지 주소`로 이해
+- DNS 서버가 있어야 한다.(AWS 나 Vercel로 활용)
+
+### 2.3. 포트(Port)
+
+```txt
+http://localhost     `:3000`       /todo/login?id=hong&pass=1234
+```
+
+- 컴퓨터의 연결 주소로서 관례상 활용하는 번호가 존재
+- :80 은 웹 서비스 포트 (index.html)
+- :3036 DB 서비스 포트
+- :3000 리액트 포트
+- :5050 Vite 프로젝트 포트
+
+### 2.4 패스 (Path)
+
+```txt
+http://localhost:3000           `/todo/login`          ?id=hong&pass=1234
+```
+
+- 백엔드 개발자가 설정/작성합니다.
+
+### 2.5. Query String
+
+```txt
+http://localhost:3000/todo/login        `?id=hong&pass=1234`
+```
+
+- 물어보고 결과를 받겠다 라는 뜻
+- request, response
+
+## 3. 라우터 구성(백엔드 역할)
+
+- `site map`으로 생각하자.
+
+```txt
+http://localhost:3000/     첫페이지, 홈페이지
+
+http://localhost:3000/about           소개
+http://localhost:3000/about/mission   미션
+http://localhost:3000/about/team      팀소개
+
+http://localhost:3000/service         서비스
+http://localhost:3000/blog            블로그 첫 화면
+http://localhost:3000/blog/desing     블로그의 디자인
+http://localhost:3000/blog/desing/1   블로그의 디자인 첫번째(REST API)
+http://localhost:3000/blog/desing/detail?id=1   Query String
+```
+
+## 4. Router에 맞게 Pages 폴더를 구성하자.
+
+```txt
+http://localhost:3000/               src/pages/Index.jsx
+
+http://localhost:3000/about          src/pages/about/Index.jsx
+
+http://localhost:3000/about/mission  src/pages/about/mission/Index.jsx
+http://localhost:3000/about/mission  src/pages/about/Mission.jsx
+
+http://localhost:3000/about/team     src/pages/about/team/Index.jsx
+http://localhost:3000/about/team     src/pages/about/Team.jsx
+
+http://localhost:3000/service        src/pages/service/Index.jsx
+http://localhost:3000/service        src/pages/service/Service.jsx
+
+http://localhost:3000/blog             src/pages/blog/Index.jsx
+http://localhost:3000/blog             src/pages/blog/Blog.jsx
+
+http://localhost:3000/blog/design      src/pages/blog/design/Index.jsx
+http://localhost:3000/blog/design      src/pages/blog/Design.jsx
+
+http://localhost:3000/blog/design/1    src/pages/blog/detail/Index.jsx
+http://localhost:3000/blog/design/1    src/pages/blog/Detail.jsx
+
+http://localhost:3000/blog/design/deail?id=1  src/pages/blog/detail/Index.jsx
+http://localhost:3000/blog/design/deail?id=1  src/pages/blog/Detail.jsx
+
+```
+
+## 5. npm 설치하기
+
+```bash
+npm i react-router-dom
+```
+
+## 6. Router 적용은 App.jsx 로 합시다.
+
+- 반드시 적용 순서는 `Router > Routes > Route` 순서 기억하자.
+
+```jsx
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route></Route>
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+## 7. 라우터 구조에 맞는 파일 생성
+
+- src/pages/Index.jsx
+- src/pages/about/About.jsx
+- src/pages/about/Mission.jsx
+- src/pages/about/Team.jsx
+- src/pages/service/Service.jsx
+- src/pages/blog/Blog.jsx
+- src/pages/blog/Design.jsx
+- src/pages/blog/Detail.jsx
+
+```jsx
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Index from "./pages/Index";
+import About from "./pages/about/About";
+import Mission from "./pages/about/Mission";
+import Team from "./pages/about/Team";
+import Service from "./pages/service/Service";
+import Blog from "./pages/blog/Blog";
+import Design from "./pages/blog/Design";
+import Detail from "./pages/blog/Detail";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index></Index>}></Route>
+        <Route path="/about" element={<About />}></Route>
+        <Route path="/about/mission" element={<Mission />}></Route>
+        <Route path="/about/team" element={<Team />}></Route>
+        <Route path="/service" element={<Service />}></Route>
+        <Route path="/blog" element={<Blog />}></Route>
+        <Route path="/blog/design/1" element={<Design />}></Route>
+        <Route path="/blog/design/detail" element={<Detail />}></Route>
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+- 이름 변경 가능
+
+```jsx
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import IndexPage from "./pages/Index";
+import AboutPage from "./pages/about/About";
+import MissionPage from "./pages/about/Mission";
+import TeamPage from "./pages/about/Team";
+import ServicePage from "./pages/service/Service";
+import BlogPage from "./pages/blog/Blog";
+import DesignPage from "./pages/blog/Design";
+import DetailPage from "./pages/blog/Detail";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<IndexPage></IndexPage>}></Route>
+        <Route path="/about" element={<AboutPage />}></Route>
+        <Route path="/about/mission" element={<MissionPage />}></Route>
+        <Route path="/about/team" element={<TeamPage />}></Route>
+        <Route path="/service" element={<ServicePage />}></Route>
+        <Route path="/blog" element={<BlogPage />}></Route>
+        <Route path="/blog/design/1" element={<DesignPage />}></Route>
+        <Route path="/blog/design/detail" element={<DetailPage />}></Route>
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+## 7.1. 중첩 라우터 (Nested)
+
+-`<Route index element={<컴포넌트>} />` 기억하자
+
+```jsx
+// 중첩 시키자!
+  <Route path="/about" element={<AboutPage />}></Route>
+  <Route path="/about/mission" element={<MissionPage />}></Route>
+  <Route path="/about/team" element={<TeamPage />}></Route>
+/* About 관련 중첩 라우터*/
+<Route path="/about">
+  <Route index element={<AboutPage />}></Route>
+  <Route path="mission" element={<MissionPage />}></Route>
+  <Route path="team" element={<TeamPage />}></Route>
+</Route>
+```
+
+- 이중중첩
+
+```jsx
+ {/* Blog 관련 */}
+ <Route path="/blog">
+  <Route index element={<BlogPage />}></Route>
+  {/* 이중중첩 */}
+  <Route path="design">
+  <Route path="1" element={<DesignPage />}></Route>
+  <Route path="detail" element={<DetailPage />}></Route>
+```
+
+## 7.2 Not Found 페이지 구성
+
+- 없는 path 로 접근한 경우 처리
+- /src/pages/NotFound.jsx 생성
+
+```jsx
+/* 잘못된 경로 접근 처리 */
+<Route path="*" element={<NotFound />}></Route>
+```
+
+## 7.3. 라우터에 param 전달하기 및 처리
+
+- `REST Api`방식
+- 백엔드와 업무 진행시 param 이라는 단어를 알아야함.
+- `경로/param`
+- `http://lacalhost:300/good/1` /1 을 param이라고 함
+- `http://lacalhost:300/good/2` /2 을 param이라고 함
+- `http://lacalhost:300/good/333` /333 을 param이라고 함
+
+```jsx
+<Route path=":id" element={<DesignPage />}></Route>
+```
+
+```jsx
+import React from "react";
+import { useParams } from "react-router-dom";
+
+function Design() {
+  //객체 구조분해 할당
+  const { id } = useParams();
+  return <div>{id} 번째 Design</div>;
+}
+
+export default Design;
+```
+
+## 7.4. 라우터에 search parm 전달 처리하기
+
+- Query String 처리하기
+- `http://lacalhost:300/search?word=bts&cate=idol`
+- `http://lacalhost:300/blog/design/detail?id=1`
+
+```jsx
+<Route path="detail" element={<DetailPage />}></Route>
+```
+
+```txt
+http://localhost:3000/blog/design/detail?id=100&user=bts
+```
+
+```jsx
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+
+function Detail() {
+  // ? search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const user = searchParams.get("user");
   return (
     <div>
-      <p>{count}</p>
-      <button onClick={() => setCount(count + 1)}>점수</button>
+      블로그 상세 정보 {id} {user}내용 Detail
     </div>
   );
 }
 
-export default Test;
+export default Detail;
 ```
 
-# useEffect와 useState, Event 종합예제
+## 7.5. 공통 레이아웃
 
-## 1. useState 로 변수 설정
+```html
+<body>
+  <div class="wrap">
+    <header>메뉴/로고</header>
+    <main>메뉴별 내용</main>
+    <footer>카피라이터</footer>
+  </div>
+</body>
+```
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-//전역자리(window)
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid#ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import IndexPage from "./pages/Index";
+import AboutPage from "./pages/about/About";
+import MissionPage from "./pages/about/Mission";
+import TeamPage from "./pages/about/Team";
+import ServicePage from "./pages/service/Service";
+import BlogPage from "./pages/blog/Blog";
+import DesignPage from "./pages/blog/Design";
+import DetailPage from "./pages/blog/Detail";
+import NotFound from "./pages/NotFound";
 
-const Button = styled.button`
-  padding: 3px;
-  background-color: #593dfa;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-function Todo() {
-  //js
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  //2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState({ initEditTodo });
-  //jsx
+function App() {
   return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input name="title" type="text" placeholder="제목을 입력하세요." />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea name="content" />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input name="title" type="text" />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea name="content" />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        <TodoItem>
-          <TodoContent>아이디:타이틀</TodoContent>
-          <TodoButtonWrap>
-            <Button>삭제</Button>
-            <Button>수정</Button>
-          </TodoButtonWrap>
-        </TodoItem>
-      </Section>
-    </Container>
+    <Router>
+      <header>
+        <Link to="/">😜로고</Link>
+        <Link to="/about">🌹소개</Link>
+        <Link to="/about/mission">🙌소개/미션</Link>
+        <Link to="/about/team">🎂소개/팀</Link>
+        <Link to="/service">😎서비스</Link>
+        <Link to="/blog">🎶블로그</Link>
+        <Link to="/blog/design/100">🎶블로그100번글</Link>
+        <Link to="/blog/design/detail?id=200&user=iu">
+          🎶블로그100번글 상세 내용
+        </Link>
+      </header>
+      <main>
+        <Routes>
+          <Route path="/" element={<IndexPage></IndexPage>}></Route>
+          {/* About 관련 */}
+          <Route path="/about">
+            <Route index element={<AboutPage />}></Route>
+            <Route path="mission" element={<MissionPage />}></Route>
+            <Route path="team" element={<TeamPage />}></Route>
+          </Route>
+
+          <Route path="/service" element={<ServicePage />}></Route>
+
+          {/* Blog 관련 */}
+          <Route path="/blog">
+            <Route index element={<BlogPage />}></Route>
+            {/* 이중중첩 */}
+            <Route path="design">
+              <Route path=":id" element={<DesignPage />}></Route>
+              <Route path="detail" element={<DetailPage />}></Route>
+            </Route>
+          </Route>
+          {/* 잘못된 경로 접근 처리 */}
+          <Route path="*" element={<NotFound />}></Route>
+        </Routes>
+      </main>
+      <footer>
+        <Link to="/">👀 홈</Link>
+      </footer>
+    </Router>
   );
 }
 
-export default Todo;
+export default App;
 ```
 
-## 2. useState 각 요소 연결하기
-
-```ts
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-//전역자리(window)
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid#ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
-
-const Button = styled.button`
-  padding: 3px;
-  background-color: #593dfa;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-function Todo() {
-  //js
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  //2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState({ initEditTodo });
-  //jsx
-  return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea value={todo.content} name="content" />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input name="title" value={editTodo.title} type="text" />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea name="content" value={editTodo.content} />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.map(item => (
-          <TodoItem key={item.id}>
-            <TodoContent>
-              {item.id}:{item.title}
-            </TodoContent>
-            <TodoButtonWrap>
-              <Button>삭제</Button>
-              <Button>수정</Button>
-            </TodoButtonWrap>
-          </TodoItem>
-        ))}
-      </Section>
-    </Container>
-  );
-}
-
-export default Todo;
-```
-
-## 3. Event 연결하여 값 업데이트 하기
-
-### 3.1. 할일 추가 이벤트 처리
+- 컴포넌트로 분리하시길 권장 (Header, Footer)
+- /src/components/Header.jsx
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-//전역자리(window)
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid#ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
+import React from "react";
+import { Link } from "react-router-dom";
 
-const Button = styled.button`
-  padding: 3px;
-  background-color: #593dfa;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-function Todo() {
-  //js
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  //2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState({ initEditTodo });
-
-  // 이벤트 자리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지 (무조건 적기)
-    if (!todo.title) {
-      alert("제목을 입력하세요");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요");
-      return;
-    }
-    //todoList 를 업데이트 합니다.
-    // [{id:0,title:"",content:""}]
-    setTodoList([...todoList, { ...todo, id: todoList.length }]);
-    setTodo(initTodo);
-  };
-  //jsx
+function Header() {
   return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              name="content"
-              onChange={handleAddChange}
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input name="title" value={editTodo.title} type="text" />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea name="content" value={editTodo.content} />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.map(item => (
-          <TodoItem key={item.id}>
-            <TodoContent>
-              {item.id}:{item.title}
-            </TodoContent>
-            <TodoButtonWrap>
-              <Button>삭제</Button>
-              <Button>수정</Button>
-            </TodoButtonWrap>
-          </TodoItem>
-        ))}
-      </Section>
-    </Container>
+    <header>
+      <Link to="/">😜로고</Link>
+      <Link to="/about">🌹소개</Link>
+      <Link to="/about/mission">🙌소개/미션</Link>
+      <Link to="/about/team">🎂소개/팀</Link>
+      <Link to="/service">😎서비스</Link>
+      <Link to="/blog">🎶블로그</Link>
+      <Link to="/blog/design/100">🎶블로그100번글</Link>
+      <Link to="/blog/design/detail?id=200&user=iu">
+        🎶블로그100번글 상세 내용
+      </Link>
+    </header>
   );
 }
 
-export default Todo;
+export default Header;
 ```
 
-### 3.2. 할일목록 이벤트 처리
-
-- 삭제, 수정 처리
-
-#### 3.2.1. 목록 삭제 이벤트 처리
+- /src/components/Footer.jsx
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-//전역자리(window)
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid#ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
+import React from "react";
+import { Link } from "react-router-dom";
 
-const Button = styled.button`
-  padding: 3px;
-  background-color: #593dfa;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-function Todo() {
-  //js
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  //2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState({ initEditTodo });
-
-  // 이벤트 자리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지 (무조건 적기)
-    if (!todo.title) {
-      alert("제목을 입력하세요");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요");
-      return;
-    }
-    //todoList 를 업데이트 합니다.
-    // [{id:0,title:"",content:""}]
-    setTodoList([...todoList, { ...todo, id: todoList.length }]);
-    setTodo(initTodo);
-  };
-
-  // 목록에서 할일 목록 삭제하기 이벤트
-  const handleDeleteTodo = id => {
-    // todoList 목록에서 id 와 같은 것을 찾고 제거하고 목록을업데이트 함
-    const tempList = todoList.filter(item => item.id != id);
-    setTodoList(tempList);
-  };
-  //jsx
+function Footer() {
   return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              name="content"
-              onChange={handleAddChange}
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input name="title" value={editTodo.title} type="text" />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea name="content" value={editTodo.content} />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.map(item => (
-          <TodoItem key={item.id}>
-            <TodoContent>
-              {item.id}:{item.title}
-            </TodoContent>
-            <TodoButtonWrap>
-              <Button onClick={() => handleDeleteTodo(item.id)}>삭제</Button>
-              <Button>수정</Button>
-            </TodoButtonWrap>
-          </TodoItem>
-        ))}
-      </Section>
-    </Container>
+    <footer>
+      <Link to="/">👀 홈</Link>
+    </footer>
   );
 }
 
-export default Todo;
+export default Footer;
 ```
 
-#### 3.2.2. 목록 수정 이벤트 처리
+- App.jsx
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-//전역자리(window)
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid#ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import IndexPage from "./pages/Index";
+import AboutPage from "./pages/about/About";
+import MissionPage from "./pages/about/Mission";
+import TeamPage from "./pages/about/Team";
+import ServicePage from "./pages/service/Service";
+import BlogPage from "./pages/blog/Blog";
+import DesignPage from "./pages/blog/Design";
+import DetailPage from "./pages/blog/Detail";
+import NotFound from "./pages/NotFound";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
-const Button = styled.button`
-  padding: 3px;
-  background-color: #593dfa;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-function Todo() {
-  //js
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  //2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState({ initEditTodo });
-
-  // 이벤트 자리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지 (무조건 적기)
-    if (!todo.title) {
-      alert("제목을 입력하세요");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요");
-      return;
-    }
-    //todoList 를 업데이트 합니다.
-    // [{id:0,title:"",content:""}]
-    setTodoList([...todoList, { ...todo, id: todoList.length }]);
-    setTodo(initTodo);
-  };
-
-  // 목록에서 할일 목록 삭제하기 이벤트
-  const handleDeleteTodo = id => {
-    // todoList 목록에서 id 와 같은 것을 찾고 제거하고 목록을업데이트 함
-    const tempList = todoList.filter(item => item.id != id);
-    setTodoList(tempList);
-  };
-  // 할일 목록 수정 이벤트 처리
-  const handleTodoListSelect = id => {
-    // 만약 id 만 전달한다면 todoList에서 데이터를 뽑는 작업을 다시 진행.
-    const tempTodo = todoList.filter(item => item.id === id);
-    setEditTodo({ ...tempTodo[0] });
-  };
-  //jsx
+function App() {
   return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              name="content"
-              onChange={handleAddChange}
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input name="title" value={editTodo.title} type="text" />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea name="content" value={editTodo.content} />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.map(item => (
-          <TodoItem key={item.id}>
-            <TodoContent>
-              {item.id}:{item.title}
-            </TodoContent>
-            <TodoButtonWrap>
-              <Button onClick={() => handleDeleteTodo(item.id)}>삭제</Button>
-              <Button onClick={() => handleTodoListSelect(item.id)}>
-                수정
-              </Button>
-            </TodoButtonWrap>
-          </TodoItem>
-        ))}
-      </Section>
-    </Container>
+    <Router>
+      <Header></Header>
+      <main>
+        <Routes>
+          <Route path="/" element={<IndexPage></IndexPage>}></Route>
+          {/* About 관련 */}
+          <Route path="/about">
+            <Route index element={<AboutPage />}></Route>
+            <Route path="mission" element={<MissionPage />}></Route>
+            <Route path="team" element={<TeamPage />}></Route>
+          </Route>
+
+          <Route path="/service" element={<ServicePage />}></Route>
+
+          {/* Blog 관련 */}
+          <Route path="/blog">
+            <Route index element={<BlogPage />}></Route>
+            {/* 이중중첩 */}
+            <Route path="design">
+              <Route path=":id" element={<DesignPage />}></Route>
+              <Route path="detail" element={<DetailPage />}></Route>
+            </Route>
+          </Route>
+          {/* 잘못된 경로 접근 처리 */}
+          <Route path="*" element={<NotFound />}></Route>
+        </Routes>
+      </main>
+      <Footer></Footer>
+    </Router>
   );
 }
 
-export default Todo;
+export default App;
 ```
 
-#### 3.2.3. 할일 수정 이벤트 처리
+## 7.6. 컴포넌트에 Props 전달하기
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-//전역자리(window)
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid#ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
-
-const Button = styled.button`
-  padding: 3px;
-  background-color: #593dfa;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-function Todo() {
-  //js
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  //2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState({ initEditTodo });
-
-  // 이벤트 자리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지 (무조건 적기)
-    if (!todo.title) {
-      alert("제목을 입력하세요");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요");
-      return;
-    }
-    //todoList 를 업데이트 합니다.
-    // [{id:0,title:"",content:""}]
-    setTodoList([...todoList, { ...todo, id: todoList.length }]);
-    setTodo(initTodo);
-  };
-
-  // 목록에서 할일 목록 삭제하기 이벤트
-  const handleDeleteTodo = id => {
-    // todoList 목록에서 id 와 같은 것을 찾고 제거하고 목록을업데이트 함
-    const tempList = todoList.filter(item => item.id != id);
-    setTodoList(tempList);
-  };
-  // 할일 목록 수정 이벤트 처리
-  const handleTodoListSelect = id => {
-    // 만약 id 만 전달한다면 todoList에서 데이터를 뽑는 작업을 다시 진행.
-    const tempTodo = todoList.filter(item => item.id === id);
-    setEditTodo({ ...tempTodo[0] });
-  };
-
-  // 할일 수정 이벤트 처리
-  const handleEditChange = e => {
-    setEditTodo({ ...editTodo, [e.target.name]: e.target.value });
-  };
-  const handleEditSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-
-    const tempArr = todoList.map(item => {
-      if (item.id === editTodo.id) {
-        //현재 수정되고 있던 할일 처리
-        return { ...editTodo };
-      } else {
-        //선택 되지않은 나머지 할일
-        return item;
-      }
-    });
-    setTodoList(tempArr);
-  };
-  //jsx
-  return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              name="content"
-              onChange={handleAddChange}
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form onSubmit={handleEditSubmit}>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input
-              name="title"
-              value={editTodo.title}
-              onChange={handleEditChange}
-              type="text"
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea
-              name="content"
-              value={editTodo.content}
-              onChange={handleEditChange}
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.map(item => (
-          <TodoItem key={item.id}>
-            <TodoContent>
-              {item.id}:{item.title}
-            </TodoContent>
-            <TodoButtonWrap>
-              <Button onClick={() => handleDeleteTodo(item.id)}>삭제</Button>
-              <Button onClick={() => handleTodoListSelect(item.id)}>
-                수정
-              </Button>
-            </TodoButtonWrap>
-          </TodoItem>
-        ))}
-      </Section>
-    </Container>
-  );
-}
-
-export default Todo;
+<Header company={"좋은회사"} service={"Todo서비스"}></Header>
 ```
-
-## 4. 추가기능
-
-- 목록이 없으면 `목록이 없습니다 ` 메세지 출력
-- 내용 수정이 아니라면 `수정 영역 안보이기` 처리
-- 사용자가 추가한 내용을 저장해 두기
-
-### 4.1. 목록 메세지 추가
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-// 전역(window) 자리
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 18px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
-
-const Button = styled.button`
-  padding: 5px;
-  background-color: #049365;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-const TodoListMessage = styled.p`
-  text-align: center;
-  font-size: 11px;
-  color: #ff0000;
-  padding: 15px;
-`;
-
-function Todo() {
-  // js 자리
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  // 2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState(initEditTodo);
-
-  // 이벤트 처리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-    if (!todo.title) {
-      alert("제목을 입력하세요.");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요.");
-      return;
-    }
-    // todoList 를 업데이트 합니다.
-    setTodoList([...todoList, { ...todo, id: todoList.length }]);
-    setTodo(initTodo);
-  };
-
-  // 목록에서 할일 목록 삭제하기 이벤트
-  const handleDeleteTodo = id => {
-    // todoList 목록에서 id 와 같은 것을 찾고, 제거하고, 목록 업데이트
-    const tempList = todoList.filter(item => item.id != id);
-    setTodoList(tempList);
-  };
-
-  // 할일 목록 수정 이벤트 처리
-  const handleTodoListSelect = id => {
-    // 만약 id 만 전달한다면 todoList 에서 데이터를 뽑는 작업을 다시진행
-    const tempTodo = todoList.filter(item => item.id === id);
-    setEditTodo({ ...tempTodo[0] });
-  };
-
-  // 수정 이벤트 처리
-  const handleEditChange = e => {
-    setEditTodo({ ...editTodo, [e.target.name]: e.target.value });
-  };
-  const handleEditSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-    const tempArr = todoList.map(item => {
-      if (item.id === editTodo.id) {
-        // 현재 수정되고 있던 할일 처리
-        return { ...editTodo };
-      } else {
-        // 나머지 할일들
-        return item;
-      }
-    });
-    setTodoList(tempArr);
-  };
-
-  // jsx 자리
-  return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              onChange={handleAddChange}
-              name="content"
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>상세보기</SubTitle>
-      <Section>
-        <Form onSubmit={handleEditSubmit}>
-          <InputWrap>
-            <Label>선택한 제목</Label>
-            <Input
-              name="title"
-              value={editTodo.title}
-              onChange={handleEditChange}
-              type="text"
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>선택한 내용</Label>
-            <TextArea
-              value={editTodo.content}
-              onChange={handleEditChange}
-              name="content"
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">내용 수정</Button>
-          </div>
-        </Form>
-      </Section>
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.length === 0 ? (
-          <TodoListMessage>등록된 할 일이 없습니다.</TodoListMessage>
-        ) : (
-          todoList.map(item => (
-            <TodoItem key={item.id}>
-              <TodoContent>
-                {item.id} : {item.title}
-              </TodoContent>
-              <TodoButtonWrap>
-                <Button onClick={() => handleDeleteTodo(item.id)}>삭제</Button>
-                <Button onClick={() => handleTodoListSelect(item.id)}>
-                  수정
-                </Button>
-              </TodoButtonWrap>
-            </TodoItem>
-          ))
-        )}
-      </Section>
-    </Container>
-  );
-}
-
-export default Todo;
+<Route path="/" element={<IndexPage first={"첫페이지입니다."} />}></Route>
 ```
 
-### 4.2. 수정 중일때만 수정내용 보이기
-
-- 수정창이 보이는 부분에 리액트 변수 하나 추가 처리
-- ` const [isEdit, setIsEdit] = useState(false);`
+## 7.7. 컴퍼넌트에 Props 인 Children 전달하기
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-// 전역(window) 자리
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 18px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
-
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
-
-const Button = styled.button`
-  padding: 5px;
-  background-color: #049365;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-const TodoListMessage = styled.p`
-  text-align: center;
-  font-size: 11px;
-  color: #ff0000;
-  padding: 15px;
-`;
-
-function Todo() {
-  // js 자리
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  // 2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 절대로 겹치지 않는 세상 유일한 값을 만들려면?
-  // 2.1.랜덤한 값을 만들어서 id에 담는다.
-  // - (uuid npm 활용)
-  //2.2. 계속 증가하는 값을 만들어서 id에 담는다.
-  const [uid, setUid] = useState(0);
-
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState(initEditTodo);
-  const [isEdit, setIsEdit] = useState(false);
-
-  // 이벤트 처리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-    if (!todo.title) {
-      alert("제목을 입력하세요.");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요.");
-      return;
-    }
-    // todoList 를 업데이트 합니다.
-    setTodoList([...todoList, { ...todo, id: uid }]);
-    setTodo(initTodo);
-    setUid(uid + 1);
-  };
-
-  // 목록에서 할일 목록 삭제하기 이벤트
-  const handleDeleteTodo = id => {
-    // todoList 목록에서 id 와 같은 것을 찾고, 제거하고, 목록 업데이트
-    const tempList = todoList.filter(item => item.id != id);
-    setTodoList(tempList);
-  };
-
-  // 할일 목록 수정 이벤트 처리
-  const handleTodoListSelect = id => {
-    // 만약 id 만 전달한다면 todoList 에서 데이터를 뽑는 작업을 다시진행
-    const tempTodo = todoList.filter(item => item.id === id);
-    setEditTodo({ ...tempTodo[0] });
-    setIsEdit(true);
-  };
-
-  // 수정 이벤트 처리
-  const handleEditChange = e => {
-    setEditTodo({ ...editTodo, [e.target.name]: e.target.value });
-  };
-  const handleEditSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-    const tempArr = todoList.map(item => {
-      if (item.id === editTodo.id) {
-        // 현재 수정되고 있던 할일 처리
-        return { ...editTodo };
-      } else {
-        // 나머지 할일들
-        return item;
-      }
-    });
-    setTodoList(tempArr);
-    setIsEdit(false);
-  };
-
-  // jsx 자리
-  return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              onChange={handleAddChange}
-              name="content"
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-
-      {isEdit && (
-        <>
-          <SubTitle>상세보기</SubTitle>
-          <Section>
-            <Form onSubmit={handleEditSubmit}>
-              <InputWrap>
-                <Label>선택한 제목</Label>
-                <Input
-                  name="title"
-                  value={editTodo.title}
-                  onChange={handleEditChange}
-                  type="text"
-                />
-              </InputWrap>
-              <InputWrap>
-                <Label>선택한 내용</Label>
-                <TextArea
-                  value={editTodo.content}
-                  onChange={handleEditChange}
-                  name="content"
-                />
-              </InputWrap>
-              <div>
-                <Button type="submit">내용 수정</Button>
-              </div>
-            </Form>
-          </Section>
-        </>
-      )}
-
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.length === 0 ? (
-          <TodoListMessage>등록된 할 일이 없습니다.</TodoListMessage>
-        ) : (
-          todoList.map(item => (
-            <TodoItem key={item.id}>
-              <TodoContent>
-                {item.id} : {item.title}
-              </TodoContent>
-              <TodoButtonWrap>
-                <Button onClick={() => handleDeleteTodo(item.id)}>삭제</Button>
-                <Button onClick={() => handleTodoListSelect(item.id)}>
-                  수정
-                </Button>
-              </TodoButtonWrap>
-            </TodoItem>
-          ))
-        )}
-      </Section>
-    </Container>
-  );
-}
-
-export default Todo;
+<Header company={"좋은회사"} service={"Todo서비스"}>
+  <div>🐱‍🚀나는 자식입니다.</div>
+  <div>🐱😂자식은 여러명 가능합니다.</div>
+</Header>
 ```
-
-## 5. 기능 버그 개선
-
-## 5.1. id 는 고유해야 한다.
-
-- 삭제 이후 추가하면 id 중복 발생
-- uuid 라이브러리 또는 일정하게 증가하는 리액트 변수 활용
 
 ```jsx
-import styled from "@emotion/styled";
-import React, { useState } from "react";
-// 전역(window) 자리
-const Container = styled.div`
-  max-width: 760px;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: #fbfbfb;
-  border-radius: 12px;
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
-`;
-const Title = styled.h1`
-  font-size: 18px;
-  text-align: center;
-  margin-bottom: 15px;
-`;
-const SubTitle = styled.h2`
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
-`;
-const Section = styled.div`
-  margin-bottom: 10px;
-`;
-const Form = styled.form`
-  position: relative;
-`;
+// children props 받을때
+import React from "react";
+import { Link } from "react-router-dom";
 
-const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-
-const Label = styled.label`
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 12px;
-`;
-
-const TextArea = styled.textarea`
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  resize: vertical;
-`;
-
-const Button = styled.button`
-  padding: 5px;
-  background-color: #049365;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 11px;
-  cursor: pointer;
-`;
-
-const TodoItem = styled.div`
-  background-color: #fafafa;
-  border: 1px solid #e2e2e2;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-const TodoContent = styled.div`
-  font-size: 12px;
-`;
-const TodoButtonWrap = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-const TodoListMessage = styled.p`
-  text-align: center;
-  font-size: 11px;
-  color: #ff0000;
-  padding: 15px;
-`;
-
-function Todo() {
-  // js 자리
-  // 리액트 변수를 이용한 화면 갱신
-  // 1. 전체 할일 관리 변수
-  const [todoList, setTodoList] = useState([]);
-  // 2. 현재 작성중인 할일 관리 변수
-  const initTodo = { title: "", content: "" };
-  const [todo, setTodo] = useState(initTodo);
-  // 3. 현재 상세화면에 출력되는 할일 관리 변수
-  const initEditTodo = { id: 0, title: "", content: "" };
-  const [editTodo, setEditTodo] = useState(initEditTodo);
-  const [isEdit, setIsEdit] = useState(false);
-
-  // 이벤트 처리
-  const handleAddChange = e => {
-    // { title: "", content: "" }
-    setTodo({ ...todo, [e.target.name]: e.target.value });
-  };
-  const handleAddSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-    if (!todo.title) {
-      alert("제목을 입력하세요.");
-      return;
-    }
-    if (!todo.content) {
-      alert("내용을 입력하세요.");
-      return;
-    }
-    // todoList 를 업데이트 합니다.
-    setTodoList([...todoList, { ...todo, id: todoList.length }]);
-    setTodo(initTodo);
-  };
-
-  // 목록에서 할일 목록 삭제하기 이벤트
-  const handleDeleteTodo = id => {
-    // todoList 목록에서 id 와 같은 것을 찾고, 제거하고, 목록 업데이트
-    const tempList = todoList.filter(item => item.id != id);
-    setTodoList(tempList);
-  };
-
-  // 할일 목록 수정 이벤트 처리
-  const handleTodoListSelect = id => {
-    // 만약 id 만 전달한다면 todoList 에서 데이터를 뽑는 작업을 다시진행
-    const tempTodo = todoList.filter(item => item.id === id);
-    setEditTodo({ ...tempTodo[0] });
-    setIsEdit(true);
-  };
-
-  // 수정 이벤트 처리
-  const handleEditChange = e => {
-    setEditTodo({ ...editTodo, [e.target.name]: e.target.value });
-  };
-  const handleEditSubmit = e => {
-    e.preventDefault(); // 새로고침 방지
-    const tempArr = todoList.map(item => {
-      if (item.id === editTodo.id) {
-        // 현재 수정되고 있던 할일 처리
-        return { ...editTodo };
-      } else {
-        // 나머지 할일들
-        return item;
-      }
-    });
-    setTodoList(tempArr);
-    setIsEdit(false);
-  };
-
-  // jsx 자리
+function Header({ children, company, service }) {
   return (
-    <Container>
-      <Title>Todo 등록</Title>
-      <Section>
-        <Form onSubmit={handleAddSubmit}>
-          <InputWrap>
-            <Label>제목</Label>
-            <Input
-              name="title"
-              value={todo.title}
-              onChange={handleAddChange}
-              type="text"
-              placeholder="제목을 입력하세요."
-            />
-          </InputWrap>
-          <InputWrap>
-            <Label>내용</Label>
-            <TextArea
-              value={todo.content}
-              onChange={handleAddChange}
-              name="content"
-            />
-          </InputWrap>
-          <div>
-            <Button type="submit">등록</Button>
-          </div>
-        </Form>
-      </Section>
-
-      {isEdit && (
-        <>
-          <SubTitle>상세보기</SubTitle>
-          <Section>
-            <Form onSubmit={handleEditSubmit}>
-              <InputWrap>
-                <Label>선택한 제목</Label>
-                <Input
-                  name="title"
-                  value={editTodo.title}
-                  onChange={handleEditChange}
-                  type="text"
-                />
-              </InputWrap>
-              <InputWrap>
-                <Label>선택한 내용</Label>
-                <TextArea
-                  value={editTodo.content}
-                  onChange={handleEditChange}
-                  name="content"
-                />
-              </InputWrap>
-              <div>
-                <Button type="submit">내용 수정</Button>
-              </div>
-            </Form>
-          </Section>
-        </>
-      )}
-
-      <SubTitle>할일목록</SubTitle>
-      <Section>
-        {todoList.length === 0 ? (
-          <TodoListMessage>등록된 할 일이 없습니다.</TodoListMessage>
-        ) : (
-          todoList.map(item => (
-            <TodoItem key={item.id}>
-              <TodoContent>
-                {item.id} : {item.title}
-              </TodoContent>
-              <TodoButtonWrap>
-                <Button onClick={() => handleDeleteTodo(item.id)}>삭제</Button>
-                <Button onClick={() => handleTodoListSelect(item.id)}>
-                  수정
-                </Button>
-              </TodoButtonWrap>
-            </TodoItem>
-          ))
-        )}
-      </Section>
-    </Container>
+    <header>
+      {children}
+      <Link to="/">😜{company}</Link>
+      <Link to="/about">🌹{service}</Link>
+      <Link to="/about/mission">🙌소개/미션</Link>
+      <Link to="/about/team">🎂소개/팀</Link>
+      <Link to="/service">😎서비스</Link>
+      <Link to="/blog">🎶블로그</Link>
+      <Link to="/blog/design/100">🎶블로그100번글</Link>
+      <Link to="/blog/design/detail?id=200&user=iu">
+        🎶블로그100번글 상세 내용
+      </Link>
+    </header>
   );
 }
 
-export default Todo;
+export default Header;
 ```
 
-## 6. 데이터 보관하기
+- useState 로 children 변경 예제
 
-- 웹브라우저에 보관(임시 보관)
-- 데이터 베이스 컴퓨터에 보관(MYSQL, PostgreSQL, NonSQL)
+```jsx
+const [isLogin, setIsLogin] = useState(false);
+```
 
-### 6.1. 웹 브라우저에 보관하기
+```jsx
+<Footer>
+  {isLogin ? <p>🌹 로그인 중이시네요.</p> : <p>😎 로그아웃 중이시군요.</p>}
+</Footer>
+```
 
-- cookie : 짧은 문자열로서 일정시간 동안 유지 후 파기
-- session : 웹 브라우저에서 활용하는 동안 유지(웹브라우저 종료시 파기)
-- localstorage : 웹 브라우저에 짧은 문자열 보관(가장흔하다.)
-
-### 6.2. Local Storage
-
-- 시나리오 1. : 웹 서비스가 시작하면 `할일 내용` 가져오기
-- 시나리오 2. : 사용자가 할일 수정, 할일 삭제, 할일 추가시 없데이트
-- useEffect 의 특징을 활용
+## 7.8. 레이아웃을 유지하고 Outlet에 출력하기

@@ -2,18 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 // css
 import "./index.css";
-import StartPage from "./pages/StartPage";
-import Posts from "./pages/Posts";
-import Albums from "./pages/Albums";
-import Photos from "./pages/Photos";
-import Comments from "./pages/Comments";
-import Todos from "./pages/Todos";
-import Users from "./pages/Users";
-import Test from "./pages/Test";
-import RegisterPage from "./pages/RegisterPage";
-import Todo from "./pages/Todo";
+import App from "./App";
 
-// 컴포넌트
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-root.render(<Todo className="wrap">Todo</Todo>);
+root.render(
+  <div className="wrap">
+    <App />
+  </div>,
+);

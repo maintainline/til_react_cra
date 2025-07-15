@@ -1,25 +1,26 @@
-import React from "react";
-import { BiColor } from "react-icons/bi";
-import BgObjRed, { BgObj } from "./bg";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 
-function Header() {
-  //js 코드자리
-  const title = "웹 서비스 제목";
-  const version = 0.5;
-  function say() {
-    return "하하하";
-  }
-  const isLogin = false;
+function Header({ children, company, service, setIsLogin }) {
+  //js
 
-  //아래는 html jsx 출력자리
+  //jsx
   return (
-    <div>
-      <div style={isLogin ? BgObj : BgObjRed}>{title}</div>
-      <div>
-        버전:{version}
-        {say()}
-      </div>
-    </div>
+    <header>
+      <div onClick={() => setIsLogin(true)}>로그인 하기</div>
+      <div onClick={() => setIsLogin(false)}>로그아웃 하기</div>
+      {children}
+      <Link to="/">😜{company}</Link>
+      <Link to="/about">🌹{service}</Link>
+      <Link to="/about/mission">🙌소개/미션</Link>
+      <Link to="/about/team">🎂소개/팀</Link>
+      <Link to="/service">😎서비스</Link>
+      <Link to="/blog">🎶블로그</Link>
+      <Link to="/blog/design/100">🎶블로그100번글</Link>
+      <Link to="/blog/design/detail?id=200&user=iu">
+        🎶블로그100번글 상세 내용
+      </Link>
+    </header>
   );
 }
 
