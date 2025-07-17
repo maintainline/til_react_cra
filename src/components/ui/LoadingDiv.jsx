@@ -1,0 +1,27 @@
+import styled from "@emotion/styled";
+import React from "react";
+import { GridLoader } from "react-spinners";
+// 전역(window)
+const Loading = styled.div`
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+function LoadingDiv() {
+  //js
+  //jsx
+  return (
+    <Loading>
+      <GridLoader color="#f3fa8c" />
+    </Loading>
+  );
+}
+
+export default LoadingDiv;
