@@ -209,3 +209,53 @@ function App() {
 
 export default App;
 ```
+
+# React.memo
+
+- 불필요한 리랜더링을 막아준다.
+- props 가 전달되면 리랜더링이 일어난다.
+- 이를 최적화함.
+
+## 1. 문제점
+
+- 리액트 변수 , 즉, `useState 에 의해서 값이 변해서 리랜더링 됨`은 정상.
+- 그러나 `리랜더링에서 제외되어야 하는 컴포넌트를 설정`할 필요성이 있다.
+
+## 2. 해결
+
+```jsx
+import React, { useCallback, useState } from "react";
+import Child from "./Child";
+
+function App() {
+  console.log("App : 리랜더링");
+  //js
+  const [count, setCount] = useState(0);
+  const [text, setText] = useState("");
+  //jsx
+  return (
+    <div>
+      <h2>Count : {count}</h2>
+      <button onClick={() => setCount(count + 1)}>함수 실행</button>
+      <Child />
+    </div>
+  );
+}
+
+export default App;
+```
+
+- React.memo 적용
+
+```jsx
+import React, { memo } from "react";
+
+function Child() {
+  //js
+  console.log("Child : 리랜더링");
+  //jsx
+  return <div>Child</div>;
+}
+
+export default memo(Child);
+```
